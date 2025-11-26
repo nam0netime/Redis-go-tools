@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/proxy"
 )
@@ -56,27 +55,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	// Print kết quả và lưu kết quả vào một biến
 	fmt.Printf("Found %d keys\n", len(keys))
 	for _, key := range keys {
 		fmt.Println(key)
 	}
+	// Sau khi lấy keys thì change TTL của toàn bộ các key
+	// Tạo một vòng lặp để chạy lệnh EXIPIRE trên redis với toàn bộ key mang patter
+	// Để cho tối ưu code có thể sẽ check TTL trước của key rồi mới đổi lại 
+	
 
-	// Get keys with pattern
-	userKeys, err := client.Keys(ctx, "user:*").Result()
-	if err != nil {
-		fmt.Printf("Error getting user keys: %v\n", err)
-	}
+	// Sau khi đổi được TTL của key thì dump toàn bộ database
 
-	// Get values
-	for _, key := range userKeys {
-		val, err := client.Get(ctx, key).Result()
-		if err != nil {
-			fmt.Printf("Error getting value for %s: %v\n", key, err)
-			continue
-		}
-		fmt.Printf("%s: %s\n", key, val)
-	}
+
+	defer client.Close()
 }
 
 // createProxyDialer creates a dialer function that routes connections through a proxy
